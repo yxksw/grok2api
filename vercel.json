@@ -5,8 +5,6 @@
   "env": {
     "LOG_LEVEL": "INFO",
     "LOG_FILE_ENABLED": "false",
-    "DATA_DIR": "/tmp/data",
-    "SERVER_STORAGE_TYPE": "pgsql",
-    "SERVER_STORAGE_URL": "postgresql+asyncpg://postgres.xkqextllpoaohaxzgfih:wTwNlApcAfwMEl7t@aws-1-us-east-1.pooler.supabase.com:6543/postgres?ssl=require"
+    "DATA_DIR": "/tmp/data"
   }
 }
