@@ -26,15 +26,23 @@ def get_admin_api_key() -> str:
     获取后台 API Key。
 
     为空时表示不启用后台接口认证。
+    优先从环境变量读取，其次是配置文件。
     """
-    api_key = get_config("app.api_key", DEFAULT_API_KEY)
+    import os
+    api_key = os.getenv("API_KEY", "")
+    if not api_key:
+        api_key = get_config("app.api_key", DEFAULT_API_KEY)
     return api_key or ""
 
 def get_app_key() -> str:
     """
     获取 App Key（后台管理密码）。
+    优先从环境变量读取，其次是配置文件。
     """
-    app_key = get_config("app.app_key", DEFAULT_APP_KEY)
+    import os
+    app_key = os.getenv("APP_KEY", "")
+    if not app_key:
+        app_key = get_config("app.app_key", DEFAULT_APP_KEY)
     return app_key or ""
 
 def get_public_api_key() -> str:
