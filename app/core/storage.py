@@ -562,6 +562,13 @@ class SQLStorage(BaseStorage):
 
         self.dialect = url.split(":", 1)[0].split("+", 1)[0].lower()
 
+        # 合并 connect_args，为 pgbouncer 兼容添加 statement_cache_size=0
+        merged_connect_args = dict(connect_args) if connect_args else {}
+        if self.dialect in ("postgresql", "postgres"):
+            # 兼容 pgbouncer 的 transaction/statement 模式
+            merged_connect_args.setdefault("statement_cache_size", 0)
+            merged_connect_args.setdefault("prepared_statement_cache_size", 0)
+
         # 配置 robust 的连接池
         self.engine = create_async_engine(
             url,
@@ -570,7 +577,7 @@ class SQLStorage(BaseStorage):
             max_overflow=10,
             pool_recycle=3600,
             pool_pre_ping=True,
-            **({"connect_args": connect_args} if connect_args else {}),
+            connect_args=merged_connect_args,
         )
         self.async_session = async_sessionmaker(self.engine, expire_on_commit=False)
         self._initialized = False
