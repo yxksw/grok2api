@@ -6,7 +6,8 @@
     "LOG_LEVEL": "INFO",
     "LOG_FILE_ENABLED": "false",
     "DATA_DIR": "/tmp/data",
-    "SERVER_STORAGE_TYPE": "local",
+    "SERVER_STORAGE_TYPE": "pgsql",
+    "SERVER_STORAGE_URL": "postgresql+asyncpg://neondb_owner:npg_pWPbAj4S1GkD@ep-restless-rice-aib27ooh-pooler.c-4.us-east-1.aws.neon.tech/neondb?ssl=require",
     "APP_KEY": "qweasdzxc123",
     "API_KEY": "qweasdzxc123"
   }
