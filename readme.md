@@ -1,6 +1,6 @@
 # Grok2API
 
-**中文** | [English](docs/README.en.md)
+**中文** | [English](docs/README.en.md) | [文档](https://blog.cheny.me/blog/posts/grok2api)
 
 > [!NOTE]
 > 本项目仅供学习与研究，使用者必须在遵循 Grok 的 **使用条款** 以及 **法律法规** 的情况下使用，不得用于非法用途。
@@ -15,18 +15,21 @@
 <br>
 
 ## 快速开始
+> [文档](https://blog.cheny.me/blog/posts/grok2api)
 
 ### 本地开发
 
 ```bash
 uv sync
-uv run main.py
+
+uv run granian --interface asgi --host 0.0.0.0 --port 8000 --workers 1 main:app
 ```
 
 ### Docker Compose
 
 ```bash
 git clone https://github.com/chenyme/grok2api
+
 cd grok2api
 
 docker compose up -d
@@ -87,7 +90,7 @@ docker compose up -d
 | `SERVER_HOST` | 服务监听地址 | `0.0.0.0` | `0.0.0.0` |
 | `SERVER_PORT` | 服务端口 | `8000` | `8000` |
 | `HOST_PORT` | Docker Compose 宿主机映射端口 | `8000` | `9000` |
-| `SERVER_WORKERS` | Uvicorn worker 数量 | `1` | `2` |
+| `SERVER_WORKERS` | 服务进程数量 | `1` | `2` |
 | `SERVER_STORAGE_TYPE` | 存储类型（`local`/`redis`/`mysql`/`pgsql`） | `local` | `pgsql` |
 | `SERVER_STORAGE_URL` | 存储连接串（local 时可为空） | `""` | `postgresql+asyncpg://user:password@host:5432/db` |
 
@@ -110,7 +113,6 @@ docker compose up -d
 | `grok-3-mini` | 1 | Basic/Super | 支持 | 支持 | - |
 | `grok-3-thinking` | 1 | Basic/Super | 支持 | 支持 | - |
 | `grok-4` | 1 | Basic/Super | 支持 | 支持 | - |
-| `grok-4-mini` | 1 | Basic/Super | 支持 | 支持 | - |
 | `grok-4-thinking` | 1 | Basic/Super | 支持 | 支持 | - |
 | `grok-4-heavy` | 4 | Super | 支持 | 支持 | - |
 | `grok-4.1-mini` | 1 | Basic/Super | 支持 | 支持 | - |
@@ -161,7 +163,7 @@ curl http://localhost:8000/v1/chat/completions \
 | `parallel_tool_calls` | boolean | 是否允许并行工具调用 | `true`, `false` |
 | `video_config` | object | **视频模型专用配置对象** | 支持：`grok-imagine-1.0-video` |
 | └─`aspect_ratio` | string | 视频宽高比 | `16:9`, `9:16`, `1:1`, `2:3`, `3:2`, `1280x720`, `720x1280`, `1792x1024`, `1024x1792`, `1024x1024` |
-| └─`video_length` | integer | 视频时长 (秒) | `6`, `10`, `15` |
+| └─`video_length` | integer | 视频时长 (秒) | `6` ~ `30` |
 | └─`resolution_name` | string | 分辨率 | `480p`, `720p` |
 | └─`preset` | string | 风格预设 | `fun`, `normal`, `spicy`, `custom` |
 | `image_config` | object | **图片模型专用配置对象** | 支持：`grok-imagine-1.0` / `grok-imagine-1.0-fast` / `grok-imagine-1.0-edit` |
@@ -331,6 +333,51 @@ curl http://localhost:8000/v1/images/edits \
 
 <br>
 
+### `POST /v1/videos`
+
+> 视频生成接口（OpenAI videos.create 兼容）
+
+```bash
+curl http://localhost:8000/v1/videos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $GROK2API_API_KEY" \
+  -d '{
+    "model": "grok-imagine-1.0-video",
+    "prompt": "霓虹雨夜街头，慢镜头追拍",
+    "size": "1792x1024",
+    "seconds": 18,
+    "quality": "standard"
+  }'
+```
+
+<details>
+<summary>支持的请求参数</summary>
+
+<br>
+
+| 字段 | 类型 | 说明 | 可用参数 |
+| :-- | :-- | :-- | :-- |
+| `model` | string | 视频模型名 | `grok-imagine-1.0-video` |
+| `prompt` | string | 视频提示词 | - |
+| `size` | string | 画面比例（会映射到 aspect_ratio） | `1280x720`, `720x1280`, `1792x1024`, `1024x1792`, `1024x1024` |
+| `seconds` | integer | 目标时长（秒） | `6` ~ `30` |
+| `quality` | string | 视频质量（映射到 resolution） | `standard`, `high` |
+| `image_reference` | object/string | 参考图（可选） | `{"image_url":"https://..."}` 或 Data URI |
+| `input_reference` | file | multipart 参考图（可选） | `png`, `jpg`, `webp` |
+
+**注意事项**：
+
+- 服务端已支持 6~30 秒自动链式扩展，**无需使用 `/v1/video/extend`**。
+- `quality=standard` 对应 `480p`；`quality=high` 对应 `720p`。
+- 基础号池请求 `720p` 时会先产出 `480p` 再按 `video.upscale_timing` 执行超分。
+- `image_reference` 与 `input_reference` 同时传入时，会按顺序作为参考图输入；视频链路只使用第 1 张。
+
+<br>
+
+</details>
+
+<br>
+
 ## 参数配置
 
 配置文件：`data/config.toml`
@@ -348,8 +395,8 @@ curl http://localhost:8000/v1/images/edits \
 | **app** | `app_url` | 应用地址 | 当前 Grok2API 服务的外部访问 URL，用于文件链接访问。 | `""` |
 |  | `app_key` | 后台密码 | 登录 Grok2API 管理后台的密码（必填）。 | `grok2api` |
 |  | `api_key` | API 密钥 | 调用 Grok2API 服务的 Token（可选，支持逗号分隔或数组）。 | `""` |
-|  | `public_enabled` | Public 开关 | 是否启用 public 功能玩法。 | `false` |
-|  | `public_key` | Public 密钥 | Public 调用密钥（可选）。 | `""` |
+|  | `function_enabled` | Function 开关 | 是否启用 function 功能玩法。 | `false` |
+|  | `function_key` | Function 密钥 | Function 调用密钥（可选）。 | `""` |
 |  | `image_format` | 图片格式 | 生成的图片格式（url 或 base64）。 | `url` |
 |  | `video_format` | 视频格式 | 生成的视频格式（html 或 url，url 为处理后的链接）。 | `html` |
 |  | `temporary` | 临时对话 | 是否启用临时对话模式。 | `true` |
@@ -361,6 +408,7 @@ curl http://localhost:8000/v1/images/edits \
 |  | `filter_tags` | 过滤标签 | 自动过滤 Grok 响应中的特殊标签。 | `["xaiartifact","xai:tool_usage_card","grok:render"]` |
 | **proxy** | `base_proxy_url` | 基础代理 URL | 代理请求到 Grok 官网的基础服务地址。 | `""` |
 |  | `asset_proxy_url` | 资源代理 URL | 代理请求到 Grok 官网的静态资源（图片/视频）地址。 | `""` |
+|  | `cf_cookies` | CF Cookies | FlareSolverr 刷新写入的完整 Cookie 字符串。 | `""` |
 |  | `skip_proxy_ssl_verify` | 跳过代理 SSL 校验 | 代理使用自签名证书时启用（仅放行代理证书，目标站点仍校验）。 | `false` |
 |  | `enabled` | CF 自动刷新 | 是否启用 CF 自动刷新。 | `false` |
 |  | `flaresolverr_url` | FlareSolverr 地址 | FlareSolverr 服务的 HTTP 地址。 | `""` |
@@ -403,6 +451,7 @@ curl http://localhost:8000/v1/images/edits \
 | **video** | `concurrent` | 并发上限 | Reverse 接口并发上限。 | `100` |
 |  | `timeout` | 请求超时 | Reverse 接口超时时间（秒）。 | `60` |
 |  | `stream_timeout` | 流空闲超时 | 流式空闲超时时间（秒）。 | `60` |
+|  | `upscale_timing` | 超分时机 | Basic 号池 720p 超分模式：`single`（每轮扩展后超分）/ `complete`（所有扩展后超分）。 | `complete` |
 | **voice** | `timeout` | 请求超时 | Voice 请求超时时间（秒）。 | `60` |
 | **asset** | `upload_concurrent` | 上传并发 | 上传接口的最大并发数。 | `100` |
 |  | `upload_timeout` | 上传超时 | 上传接口超时时间（秒）。 | `60` |
