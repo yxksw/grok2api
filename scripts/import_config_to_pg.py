@@ -31,26 +31,8 @@ async def import_config():
 
     print(f"读取到 {len(config_data)} 个配置节")
 
-    # 从 .env 读取数据库连接信息
-    import os
-    from dotenv import load_dotenv
-
-    env_file = BASE_DIR / ".env"
-    if env_file.exists():
-        load_dotenv(env_file)
-
-    db_url = os.getenv("SERVER_STORAGE_URL", "")
-    if not db_url:
-        print("错误: 环境变量 SERVER_STORAGE_URL 未设置")
-        return
-
-    # 转换数据库 URL 为 asyncpg 格式
-    if db_url.startswith("postgresql+asyncpg://"):
-        pass
-    elif db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    elif db_url.startswith("postgresql://"):
-        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # Neon 数据库连接字符串
+    db_url = "postgresql+asyncpg://neondb_owner:npg_pWPbAj4S1GkD@ep-restless-rice-aib27ooh-pooler.c-4.us-east-1.aws.neon.tech/neondb?ssl=require"
 
     print(f"连接到数据库...")
 
