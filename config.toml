@@ -2,10 +2,10 @@
 [app]
 # 应用访问地址（用于生成文件链接）
 app_url = "https://grok.050815.xyz"
-# 后台管理密码
-app_key = "qweasdzxc123"
-# API 调用密钥（可选）
-api_key = "qweasdzxc123"
+# 后台管理密码（从环境变量 APP_KEY 读取）
+app_key = ""
+# API 调用密钥（从环境变量 API_KEY 读取）
+api_key = ""
 # 是否启用 public 功能玩法
 public_enabled = false
 # Public 调用密钥（可选）
