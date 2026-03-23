@@ -8,8 +8,3 @@ commits = [
   "80ae007ccf76e04c4fc6839bd55222bf9efafc1d",  # vercel.json 中的密码
   "d146c68ba10daf4c61bfbac48587e4b8b47f4507"   # config.toml 中的密码
 ]
-
-# 忽略特定文件路径的密码检测
-[[allowlist]]
-description = "Ignore .env files (should be gitignored anyway)"
-paths = ["\.env$"]
