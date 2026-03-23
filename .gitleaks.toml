@@ -1,10 +1,9 @@
 title = "Grok2API Gitleaks Configuration"
 description = "Custom gitleaks config to ignore known leaks in old commits"
 
-# 忽略特定提交中的密码泄露
-[[allowlist]]
+[allowlist]
 description = "Ignore old commits with hardcoded passwords"
 commits = [
-  "80ae007ccf76e04c4fc6839bd55222bf9efafc1d",  # vercel.json 中的密码
-  "d146c68ba10daf4c61bfbac48587e4b8b47f4507"   # config.toml 中的密码
+  "80ae007ccf76e04c4fc6839bd55222bf9efafc1d",
+  "d146c68ba10daf4c61bfbac48587e4b8b47f4507"
 ]
